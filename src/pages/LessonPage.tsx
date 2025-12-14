@@ -93,8 +93,8 @@ export default function LessonPage() {
         <button
           onClick={() => toggleComplete(lesson.id)}
           className={`w-full flex items-center justify-center gap-2 h-12 rounded-lg font-medium transition-all mb-8 ${completed
-              ? 'bg-success/10 text-success border border-success'
-              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+            ? 'bg-success/10 text-success border border-success'
+            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
             }`}
         >
           {completed ? (
@@ -151,12 +151,12 @@ export default function LessonPage() {
                 <p className="text-neutral-500 dark:text-neutral-400 max-w-md mb-6">
                   This lesson is part of our Pro curriculum. Upgrade to access all 10 weeks of content, projects, and expert guest sessions.
                 </p>
-                <Link
-                  to="/"
+                <button
+                  onClick={() => window.location.href = '/#pricing'}
                   className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
                 >
                   Upgrade to Pro
-                </Link>
+                </button>
               </div>
             )}
             <div className={`bg-surface dark:bg-neutral-800 rounded-xl p-8 shadow-card prose prose-lg prose-neutral dark:prose-invert max-w-none ${isLocked ? 'blur-sm select-none pointer-events-none opacity-50 h-[400px] overflow-hidden' : ''

@@ -219,7 +219,13 @@ export default function HomePage() {
                   <span>Direct Instructor Support</span>
                 </li>
               </ul>
-              <button className="w-full h-12 flex items-center justify-center rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-semibold transition-colors">
+              <button
+                onClick={() => {
+                  // Redirect to Stripe checkout - replace with your actual payment link
+                  window.open('https://buy.stripe.com/test_00g5mn4ov9YO0XS7ss', '_blank');
+                }}
+                className="w-full h-12 flex items-center justify-center rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-semibold transition-colors"
+              >
                 Upgrade to Pro
               </button>
             </div>
