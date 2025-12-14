@@ -16,18 +16,23 @@ export const STRIPE_CONFIG = {
         currency: 'usd',
     },
 
-    // Success/Cancel URLs
-    successUrl: `${window.location.origin}/?payment=success`,
-    cancelUrl: `${window.location.origin}/?payment=cancelled`,
+    // Success/Cancel URLs - must match PaymentResultPage route and query params
+    successUrl: `${window.location.origin}/payment?status=success`,
+    cancelUrl: `${window.location.origin}/payment?status=cancelled`,
 };
 
 // Helper function to redirect to Stripe checkout
-export function redirectToCheckout() {
+export function redirectToCheckout(userEmail?: string) {
     // For now, use payment link (simplest approach, no backend needed)
     // Later can upgrade to Stripe Checkout Sessions with a backend
     const paymentUrl = new URL(STRIPE_CONFIG.paymentLink);
     paymentUrl.searchParams.set('success_url', STRIPE_CONFIG.successUrl);
     paymentUrl.searchParams.set('cancel_url', STRIPE_CONFIG.cancelUrl);
+
+    // Pre-fill customer email if provided
+    if (userEmail) {
+        paymentUrl.searchParams.set('prefilled_email', userEmail);
+    }
 
     window.location.href = paymentUrl.toString();
 }

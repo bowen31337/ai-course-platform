@@ -3,11 +3,25 @@ import { Link } from 'react-router-dom';
 import { Play, Users, Calendar, Award, ChevronRight, ArrowRight, Check as CheckIcon, Code, Database, Cpu, MessageSquare, Terminal, Zap, Shield } from 'lucide-react';
 import { courseData } from '../data/courseData';
 import { useProgress } from '../context/ProgressContext';
+import { useAuth } from '../context/AuthContext';
+import { redirectToCheckout } from '../lib/stripe';
 
 export default function HomePage() {
   const { getOverallProgress, getLastLesson } = useProgress();
   const overall = getOverallProgress();
   const resumeLesson = getLastLesson();
+  const { user, signIn } = useAuth();
+
+  const handleGetProAccess = async () => {
+    if (!user) {
+      // User must sign in first before making a payment
+      // The OAuth flow will handle the authentication prompt
+      await signIn();
+      return;
+    }
+    // Redirect to Stripe checkout with user's email pre-filled
+    redirectToCheckout(user.email);
+  };
 
   const benefits = [
     { icon: Terminal, title: 'Production-Ready Skills', description: 'Move beyond basic prompts. Learn to build reliable, scalable AI applications using industry-standard tools.' },
@@ -142,7 +156,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-neutral-800 group-hover:scale-105 transition-transform duration-500 opacity-50" />
                 {/* Abstract pattern placeholder */}
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-                
+
                 <div className="relative z-20">
                   <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center mb-4">
                     <project.icon className="w-6 h-6 text-white" />
@@ -187,15 +201,15 @@ export default function HomePage() {
         </div>
       </section>
 
-       {/* FAQ for GEO/SEO */}
-       <section className="py-20 px-6" aria-label="Frequently Asked Questions">
+      {/* FAQ for GEO/SEO */}
+      <section className="py-20 px-6" aria-label="Frequently Asked Questions">
         <div className="max-w-[800px] mx-auto">
           <h2 className="text-h2 text-neutral-900 dark:text-white text-center mb-12">Frequently Asked Questions</h2>
           <div className="space-y-8">
             <div className="prose dark:prose-invert max-w-none">
               <h3 className="text-xl font-bold mb-2">Who is this course for?</h3>
               <p className="text-neutral-500 dark:text-neutral-400">
-                This course is designed for web developers (mid-level and above) who want to integrate AI into their applications. 
+                This course is designed for web developers (mid-level and above) who want to integrate AI into their applications.
                 Knowledge of JavaScript/TypeScript and React is recommended.
               </p>
             </div>
@@ -208,7 +222,7 @@ export default function HomePage() {
             <div className="prose dark:prose-invert max-w-none">
               <h3 className="text-xl font-bold mb-2">Is it really free?</h3>
               <p className="text-neutral-500 dark:text-neutral-400">
-                Yes! The Community Edition includes full access to all lessons and basic project templates. 
+                Yes! The Community Edition includes full access to all lessons and basic project templates.
                 Our Pro Plan adds certification, advanced solutions, and mentor support.
               </p>
             </div>
@@ -248,15 +262,15 @@ export default function HomePage() {
                 >
                   Start for Free
                 </Link>
-                <button 
-                  onClick={() => window.open('https://buy.stripe.com/test_bJe14gedl3Ld0iOeDv0Fi00', '_blank')}
+                <button
+                  onClick={handleGetProAccess}
                   className="px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 transition-colors"
                 >
                   Get Pro Access - $49
                 </button>
               </div>
             </div>
-            
+
             {/* Pricing Card Visual */}
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-purple-600 rounded-2xl blur opacity-30"></div>

@@ -1,24 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export default function PaymentResultPage() {
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const status = searchParams.get('status');
-    const { user, signIn } = useAuth();
+    const { user } = useAuth();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
+        // Redirect to home if no status parameter
+        if (!status) {
+            navigate('/', { replace: true });
+            return;
+        }
+
         // If payment was successful, refresh the session to get updated is_pro status
         if (status === 'success' && user) {
             setIsRefreshing(true);
-            // Give webhook time to process
-            setTimeout(() => {
-                window.location.reload();
+            // Give webhook time to process (3 seconds), then refresh session
+            setTimeout(async () => {
+                try {
+                    // Refresh the session to get updated user metadata
+                    await supabase.auth.refreshSession();
+                    // Navigate to syllabus after refresh
+                    navigate('/syllabus', { replace: true });
+                } catch (error) {
+                    console.error('Error refreshing session:', error);
+                    // Fallback to reload if refresh fails
+                    window.location.href = '/syllabus';
+                }
             }, 3000);
         }
-    }, [status, user]);
+    }, [status, user, navigate]);
 
     if (status === 'success') {
         return (
