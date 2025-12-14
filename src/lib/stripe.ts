@@ -4,7 +4,7 @@
 export const STRIPE_CONFIG = {
     // Test mode payment link - replace with your actual payment link from Stripe Dashboard
     // Create one at: https://dashboard.stripe.com/payment-links
-    paymentLink: 'https://buy.stripe.com/test_00g5mn4ov9YO0XS7ss', // Placeholder - replace with actual
+    paymentLink: 'https://buy.stripe.com/test_bJe14gedl3Ld0iOeDv0Fi00',
 
     // Publishable key for client-side Stripe.js (if needed later)
     publishableKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY || '',

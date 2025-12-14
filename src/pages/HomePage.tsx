@@ -222,7 +222,7 @@ export default function HomePage() {
               <button
                 onClick={() => {
                   // Redirect to Stripe checkout - replace with your actual payment link
-                  window.open('https://buy.stripe.com/test_00g5mn4ov9YO0XS7ss', '_blank');
+                  window.open('https://buy.stripe.com/test_bJe14gedl3Ld0iOeDv0Fi00', '_blank');
                 }}
                 className="w-full h-12 flex items-center justify-center rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-semibold transition-colors"
               >
