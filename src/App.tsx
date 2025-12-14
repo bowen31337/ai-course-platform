@@ -14,6 +14,7 @@ import FAQPage from './pages/FAQPage';
 import CommunityPage from './pages/CommunityPage';
 import AboutPage from './pages/AboutPage';
 import ProjectPage from './pages/ProjectPage';
+import PaymentResultPage from './pages/PaymentResultPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="resources/faq" element={<FAQPage />} />
               <Route path="community" element={<CommunityPage />} />
               <Route path="about" element={<AboutPage />} />
+              <Route path="payment" element={<PaymentResultPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="project" element={<ProjectPage />} />
               </Route>

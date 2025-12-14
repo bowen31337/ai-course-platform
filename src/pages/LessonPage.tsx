@@ -159,18 +159,8 @@ export default function LessonPage() {
                 </button>
               </div>
             )}
-            <div className={`bg-surface dark:bg-neutral-800 rounded-xl p-8 shadow-card prose prose-lg prose-neutral dark:prose-invert max-w-none ${isLocked ? 'blur-sm select-none pointer-events-none opacity-50 h-[400px] overflow-hidden' : ''
+            <div className={`markdown-content ${isLocked ? 'blur-sm select-none pointer-events-none opacity-50 h-[400px] overflow-hidden' : ''
               }
-              prose-headings:text-neutral-900 dark:prose-headings:text-white
-              prose-h1:text-2xl prose-h1:font-bold prose-h1:mt-0 prose-h1:mb-4
-              prose-h2:text-xl prose-h2:font-semibold prose-h2:mt-6 prose-h2:mb-3
-              prose-h3:text-lg prose-h3:font-semibold prose-h3:mt-4 prose-h3:mb-2
-              prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-p:leading-relaxed
-              prose-li:text-neutral-700 dark:prose-li:text-neutral-300
-              prose-strong:text-neutral-900 dark:prose-strong:text-white
-              prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-code:bg-neutral-100 dark:prose-code:bg-neutral-700 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-              prose-pre:p-0 prose-pre:bg-transparent prose-pre:overflow-hidden prose-pre:rounded-lg
-              prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline
             `}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
