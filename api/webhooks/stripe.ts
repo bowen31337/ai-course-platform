@@ -55,14 +55,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         try {
             // Find user by email in Supabase
             const { data: users, error: findError } =
-                await supabaseAdmin.auth.admin.listUsers();
+                await (supabaseAdmin.auth as any).admin.listUsers();
 
             if (findError) {
                 console.error('Error finding users:', findError);
                 return res.status(500).json({ error: 'Error finding user' });
             }
 
-            const user = users.users.find((u) => u.email === customerEmail);
+            const user = users.users.find((u: any) => u.email === customerEmail);
 
             if (!user) {
                 console.log(
@@ -72,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             // Update user's app_metadata to mark as Pro
-            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+            const { error: updateError } = await (supabaseAdmin.auth as any).admin.updateUserById(
                 user.id,
                 {
                     app_metadata: {
