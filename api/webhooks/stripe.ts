@@ -1,10 +1,6 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
-
-export const config = {
-    runtime: 'edge',
-};
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -18,30 +14,28 @@ const supabaseAdmin = createClient(
     { auth: { persistSession: false } }
 );
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
-        return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const sig = req.headers.get('stripe-signature');
+    const sig = req.headers['stripe-signature'] as string;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
     if (!sig || !webhookSecret) {
         console.error('Missing signature or webhook secret');
-        return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
+        return res.status(400).json({ error: 'Missing signature' });
     }
 
     let event: Stripe.Event;
 
     try {
-        const body = await req.text();
-        event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+        // Vercel sends raw body as string/buffer
+        const rawBody = req.body;
+        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err: any) {
         console.error(`Webhook signature verification failed: ${err.message}`);
-        return NextResponse.json(
-            { error: `Webhook Error: ${err.message}` },
-            { status: 400 }
-        );
+        return res.status(400).json({ error: `Webhook Error: ${err.message}` });
     }
 
     // Handle the checkout.session.completed event
@@ -53,7 +47,7 @@ export default async function handler(req: NextRequest) {
 
         if (!customerEmail) {
             console.error('No customer email in session');
-            return NextResponse.json({ error: 'No customer email' }, { status: 400 });
+            return res.status(400).json({ error: 'No customer email' });
         }
 
         console.log(`Processing payment for: ${customerEmail}`);
@@ -65,7 +59,7 @@ export default async function handler(req: NextRequest) {
 
             if (findError) {
                 console.error('Error finding users:', findError);
-                return NextResponse.json({ error: 'Error finding user' }, { status: 500 });
+                return res.status(500).json({ error: 'Error finding user' });
             }
 
             const user = users.users.find((u) => u.email === customerEmail);
@@ -74,11 +68,7 @@ export default async function handler(req: NextRequest) {
                 console.log(
                     `User not found for email: ${customerEmail}. They may need to sign up first.`
                 );
-                // Store the purchase for later - could use a 'purchases' table
-                return NextResponse.json(
-                    { message: 'User not found, purchase recorded' },
-                    { status: 200 }
-                );
+                return res.status(200).json({ message: 'User not found, purchase recorded' });
             }
 
             // Update user's app_metadata to mark as Pro
@@ -96,18 +86,22 @@ export default async function handler(req: NextRequest) {
 
             if (updateError) {
                 console.error('Error updating user:', updateError);
-                return NextResponse.json({ error: 'Error updating user' }, { status: 500 });
+                return res.status(500).json({ error: 'Error updating user' });
             }
 
             console.log(`Successfully upgraded user ${user.id} to Pro`);
         } catch (err: any) {
             console.error('Error processing webhook:', err);
-            return NextResponse.json(
-                { error: 'Webhook processing error' },
-                { status: 500 }
-            );
+            return res.status(500).json({ error: 'Webhook processing error' });
         }
     }
 
-    return NextResponse.json({ received: true }, { status: 200 });
+    return res.status(200).json({ received: true });
 }
+
+// Disable body parsing so we can verify webhook signature
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
