@@ -49,10 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const signIn = async (email: string) => {
+        // Use VITE_SITE_URL for consistent redirect across environments
+        const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
         const { error } = await supabase.auth.signInWithOtp({
             email,
             options: {
-                emailRedirectTo: window.location.origin,
+                emailRedirectTo: siteUrl,
             },
         });
         if (error) throw error;
