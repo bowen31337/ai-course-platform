@@ -1,6 +1,19 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Readable } from 'stream';
+
+// Helper function to read raw body from request stream
+async function getRawBody(req: VercelRequest): Promise<Buffer> {
+    const chunks: Buffer[] = [];
+    const readable = req as unknown as Readable;
+    
+    return new Promise((resolve, reject) => {
+        readable.on('data', (chunk: Buffer) => chunks.push(chunk));
+        readable.on('end', () => resolve(Buffer.concat(chunks)));
+        readable.on('error', reject);
+    });
+}
 
 // Initialize Stripe - trim to remove any accidental whitespace/newlines
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY?.trim() || '', {
@@ -20,7 +33,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const sig = req.headers['stripe-signature'] as string;
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+    // Trim webhook secret to remove any accidental whitespace/newlines
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
     if (!sig || !webhookSecret) {
         console.error('Missing signature or webhook secret');
@@ -30,8 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let event: Stripe.Event;
 
     try {
-        // Vercel sends raw body as string/buffer
-        const rawBody = req.body;
+        // Read raw body as buffer for signature verification
+        const rawBody = await getRawBody(req);
         event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err: any) {
         console.error(`Webhook signature verification failed: ${err.message}`);
