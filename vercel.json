@@ -1,5 +1,5 @@
 {
-    "installCommand": "pnpm install --shamefully-hoist",
+    "installCommand": "pnpm install --shamefully-hoist && cd api && npm install",
     "rewrites": [
         {
             "source": "/api/(.*)",
