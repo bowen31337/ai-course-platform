@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -9,6 +9,7 @@ interface AuthContextType {
     loading: boolean;
     signIn: (email: string) => Promise<void>;
     signOut: () => Promise<void>;
+    refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
     loading: true,
     signIn: async () => { },
     signOut: async () => { },
+    refreshSession: async () => { },
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -26,27 +28,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [isPro, setIsPro] = useState(false);
 
+    // Helper to update state from session
+    const updateFromSession = useCallback((session: Session | null) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsPro(session?.user?.app_metadata?.is_pro || false);
+    }, []);
+
+    // Force refresh the session to get updated app_metadata (e.g., after Stripe webhook)
+    const refreshSession = useCallback(async () => {
+        const { data: { session }, error } = await supabase.auth.refreshSession();
+        if (!error && session) {
+            updateFromSession(session);
+        }
+    }, [updateFromSession]);
+
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            // Check for pro status (e.g., from metadata or a separate table)
-            // For now, checks app metadata 'is_pro' which we can set via Stripe webhook later
-            setIsPro(session?.user?.app_metadata?.is_pro || false);
+        // Get initial session - use refreshSession to ensure we have latest metadata
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+            if (session) {
+                // Refresh to get latest app_metadata
+                const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
+                updateFromSession(refreshedSession ?? session);
+            } else {
+                updateFromSession(null);
+            }
             setLoading(false);
         });
 
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsPro(session?.user?.app_metadata?.is_pro || false);
+            updateFromSession(session);
             setLoading(false);
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [updateFromSession]);
 
     const signIn = async (email: string) => {
         // Use VITE_SITE_URL for consistent redirect across environments
@@ -65,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, session, isPro, loading, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, session, isPro, loading, signIn, signOut, refreshSession }}>
             {!loading && children}
         </AuthContext.Provider>
     );

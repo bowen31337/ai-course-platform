@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function PaymentResultPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { refreshSession } = useAuth();
     const status = searchParams.get('status');
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -15,17 +17,31 @@ export default function PaymentResultPage() {
             return;
         }
 
-        // If payment was successful, redirect after giving webhook time to process
-        // No user dependency - use hard redirect to force fresh session
+        // If payment was successful, refresh session to get updated pro status
         if (status === 'success') {
             setIsRefreshing(true);
-            // Give webhook 5 seconds to process, then hard redirect
-            // Hard redirect ensures fresh session with updated app_metadata (is_pro)
-            setTimeout(() => {
-                window.location.href = '/syllabus';
-            }, 5000);
+            
+            // Poll for pro status update (webhook may take a moment to process)
+            const pollForProStatus = async (attempts = 0) => {
+                if (attempts >= 6) {
+                    // After 6 attempts (30 seconds), redirect anyway
+                    navigate('/syllabus', { replace: true });
+                    return;
+                }
+                
+                // Refresh the session to get updated app_metadata
+                await refreshSession();
+                
+                // Wait 5 seconds before next attempt or redirect
+                setTimeout(() => {
+                    pollForProStatus(attempts + 1);
+                }, 5000);
+            };
+            
+            // Start polling after a brief delay for webhook processing
+            setTimeout(() => pollForProStatus(), 2000);
         }
-    }, [status, navigate]);
+    }, [status, navigate, refreshSession]);
 
     if (status === 'success') {
         return (
