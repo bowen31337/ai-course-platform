@@ -2,15 +2,15 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe - trim to remove any accidental whitespace/newlines
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY?.trim() || '', {
     apiVersion: '2025-11-17.clover',
 });
 
-// Initialize Supabase Admin Client
+// Initialize Supabase Admin Client - trim env vars for safety
 const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_URL?.trim() || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || '',
     { auth: { persistSession: false } }
 );
 

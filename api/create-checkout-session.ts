@@ -1,7 +1,8 @@
 import Stripe from 'stripe';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Trim the API key to remove any accidental whitespace/newlines
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY?.trim() || '', {
     apiVersion: '2025-11-17.clover',
 });
 
