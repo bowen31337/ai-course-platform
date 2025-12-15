@@ -1,7 +1,6 @@
 {
   "name": "api",
   "private": true,
-  "type": "module",
   "dependencies": {
     "stripe": "^20.0.0",
     "@supabase/supabase-js": "^2.87.1"
