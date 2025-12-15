@@ -1,5 +1,15 @@
 {
-    "installCommand": "pnpm install --shamefully-hoist && cd api && npm install",
+    "installCommand": "pnpm install",
+    "functions": {
+        "api/*.ts": {
+            "memory": 1024,
+            "maxDuration": 10
+        },
+        "api/**/*.ts": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
+    },
     "rewrites": [
         {
             "source": "/api/(.*)",
