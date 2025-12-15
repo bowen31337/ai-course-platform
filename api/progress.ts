@@ -1,24 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST' && req.method !== 'GET') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // Get the user's JWT from the Authorization header
-  const authHeader = req.headers.get('Authorization');
+  const authHeader = req.headers['authorization'] as string;
   if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Missing Authorization header' });
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -36,14 +27,11 @@ export default async function handler(req: Request) {
     }
   );
 
-  // Verify the user
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  // Verify the user with the token
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
   if (userError || !user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   if (req.method === 'GET') {
@@ -55,21 +43,15 @@ export default async function handler(req: Request) {
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: error.message });
     }
 
-    return new Response(JSON.stringify(data || { completed_lessons: [], last_lesson: null }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json(data || { completed_lessons: [], last_lesson: null });
   }
 
   if (req.method === 'POST') {
     // Update progress
-    const body = await req.json();
+    const body = req.body as { completedLessons?: string[]; lastLesson?: string };
     const { completedLessons, lastLesson } = body;
 
     const { error } = await supabase
@@ -82,15 +64,10 @@ export default async function handler(req: Request) {
       });
 
     if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: error.message });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json({ success: true });
   }
 }
+
