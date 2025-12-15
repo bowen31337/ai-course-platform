@@ -15,6 +15,7 @@ import CommunityPage from './pages/CommunityPage';
 import AboutPage from './pages/AboutPage';
 import ProjectPage from './pages/ProjectPage';
 import PaymentResultPage from './pages/PaymentResultPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
+              <Route path="login" element={<LoginPage />} />
               <Route path="syllabus" element={<SyllabusPage />} />
               <Route path="week/:weekId" element={<WeekPage />} />
               <Route path="week/:weekId/:lessonSlug" element={<LessonPage />} />

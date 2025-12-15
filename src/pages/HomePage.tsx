@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Play, Users, Calendar, Award, ChevronRight, ArrowRight, Check as CheckIcon, Code, Database, Cpu, MessageSquare, Terminal, Zap, Shield } from 'lucide-react';
 import { courseData } from '../data/courseData';
 import { useProgress } from '../context/ProgressContext';
@@ -10,13 +10,13 @@ export default function HomePage() {
   const { getOverallProgress, getLastLesson } = useProgress();
   const overall = getOverallProgress();
   const resumeLesson = getLastLesson();
-  const { user, signIn } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleGetProAccess = async () => {
     if (!user) {
       // User must sign in first before making a payment
-      // The OAuth flow will handle the authentication prompt
-      await signIn();
+      navigate('/login');
       return;
     }
     // Redirect to Stripe checkout with user's email pre-filled
@@ -266,7 +266,7 @@ export default function HomePage() {
                   onClick={handleGetProAccess}
                   className="px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 transition-colors"
                 >
-                  Get Pro Access - $49
+                  Get Pro Access - $19
                 </button>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function HomePage() {
                     <p className="text-neutral-400">One-time payment</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">$49</p>
+                    <p className="text-3xl font-bold text-white">$19</p>
                     <p className="text-sm text-green-400">Save 50% today</p>
                   </div>
                 </div>

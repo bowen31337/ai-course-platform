@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { courseData, Week, Lesson } from '../data/courseData';
+import { useAuth } from './AuthContext';
 
 interface Progress {
   completedLessons: string[];
@@ -24,7 +25,9 @@ const ProgressContext = createContext<ProgressContextType | undefined>(undefined
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState<Progress>({ completedLessons: [] });
+  const { user, session } = useAuth();
 
+  // Load from local storage initially
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -36,10 +39,44 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Sync with API when user logs in
+  useEffect(() => {
+    if (user && session) {
+      fetch('/api/progress', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.completed_lessons) {
+          const newProgress = {
+            completedLessons: data.completed_lessons,
+            lastLesson: data.last_lesson
+          };
+          setProgress(newProgress);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+        }
+      })
+      .catch(err => console.error('Failed to fetch progress', err));
+    }
+  }, [user, session]);
+
   const saveProgress = useCallback((newProgress: Progress) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
     setProgress(newProgress);
-  }, []);
+
+    if (user && session) {
+       fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(newProgress)
+      }).catch(err => console.error('Failed to save progress', err));
+    }
+  }, [user, session]);
 
   const markComplete = useCallback((lessonId: string) => {
     setProgress(prev => {
@@ -48,12 +85,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           ...prev,
           completedLessons: [...prev.completedLessons, lessonId]
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+        saveProgress(newProgress);
         return newProgress;
       }
       return prev;
     });
-  }, []);
+  }, [saveProgress]);
 
   const toggleComplete = useCallback((lessonId: string) => {
     setProgress(prev => {
@@ -64,10 +101,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           ? prev.completedLessons.filter(id => id !== lessonId)
           : [...prev.completedLessons, lessonId]
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+      saveProgress(newProgress);
       return newProgress;
     });
-  }, []);
+  }, [saveProgress]);
 
   const setLastLesson = useCallback((weekId: number, lessonSlug: string) => {
     setProgress(prev => {
@@ -75,10 +112,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         ...prev,
         lastLesson: { weekId, lessonSlug }
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+      saveProgress(newProgress);
       return newProgress;
     });
-  }, []);
+  }, [saveProgress]);
 
   const isComplete = useCallback((lessonId: string) => {
     return progress.completedLessons.includes(lessonId);

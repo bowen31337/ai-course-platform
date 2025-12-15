@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Search, Sun, Moon, BookOpen } from 'lucide-react';
+import { Menu, Search, Sun, Moon, BookOpen, LogOut, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -20,6 +21,7 @@ const navLinks = [
 export default function Navbar({ onMenuClick, onSearchClick, theme, onThemeToggle }: NavbarProps) {
   const location = useLocation();
   const showMenu = location.pathname.includes('/week/');
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-[72px] bg-surface dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 z-50 shadow-sm">
@@ -81,6 +83,31 @@ export default function Navbar({ onMenuClick, onSearchClick, theme, onThemeToggl
               <Sun className="w-5 h-5 text-neutral-200" />
             )}
           </button>
+
+          {user ? (
+            <div className="flex items-center gap-2">
+               <span className="text-sm text-neutral-600 dark:text-neutral-400 hidden sm:block">
+                 {user.email?.split('@')[0]}
+               </span>
+               <button
+                onClick={() => signOut()}
+                className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md transition-colors text-neutral-700 dark:text-neutral-200"
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+             <Link
+              to="/login"
+              className="flex items-center gap-2 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md transition-colors text-neutral-700 dark:text-neutral-200"
+              aria-label="Sign in"
+            >
+              <User className="w-5 h-5" />
+              <span className="text-sm font-medium hidden sm:block">Login</span>
+            </Link>
+          )}
 
           <Link
             to="/week/1/introduction"
