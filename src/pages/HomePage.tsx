@@ -10,7 +10,7 @@ export default function HomePage() {
   const { getOverallProgress, getLastLesson } = useProgress();
   const overall = getOverallProgress();
   const resumeLesson = getLastLesson();
-  const { user } = useAuth();
+  const { user, isPro } = useAuth();
   const navigate = useNavigate();
 
   const handleGetProAccess = async () => {
@@ -236,9 +236,14 @@ export default function HomePage() {
         <div className="max-w-[1200px] mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-6">Invest in Your AI Career</h2>
+              <h2 className="text-4xl font-bold mb-6">
+                {isPro ? "You're a Pro Member! 🎉" : "Invest in Your AI Career"}
+              </h2>
               <p className="text-xl text-neutral-400 mb-8">
-                Get lifetime access to the course, future updates, and a community of like-minded engineers.
+                {isPro 
+                  ? "Thank you for your support! You have full access to all 10 weeks of content, projects, and expert sessions."
+                  : "Get lifetime access to the course, future updates, and a community of like-minded engineers."
+                }
               </p>
               <ul className="space-y-4 mb-8">
                 {[
@@ -248,48 +253,75 @@ export default function HomePage() {
                   'Private Discord Community Access'
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <CheckIcon className="w-4 h-4 text-green-500" />
+                    <div className={`w-6 h-6 rounded-full ${isPro ? 'bg-green-500' : 'bg-green-500/20'} flex items-center justify-center`}>
+                      <CheckIcon className={`w-4 h-4 ${isPro ? 'text-white' : 'text-green-500'}`} />
                     </div>
                     <span className="text-neutral-200">{item}</span>
                   </li>
                 ))}
               </ul>
               <div className="flex flex-wrap gap-4">
-                <Link
-                  to="/week/1/introduction"
-                  className="px-8 py-4 bg-white text-neutral-900 font-bold rounded-lg hover:bg-neutral-100 transition-colors"
-                >
-                  Start for Free
-                </Link>
-                <button
-                  onClick={handleGetProAccess}
-                  className="px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 transition-colors"
-                >
-                  Get Pro Access - $19
-                </button>
+                {isPro ? (
+                  <Link
+                    to="/syllabus"
+                    className="px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 transition-colors"
+                  >
+                    Continue Learning
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/week/1/introduction"
+                      className="px-8 py-4 bg-white text-neutral-900 font-bold rounded-lg hover:bg-neutral-100 transition-colors"
+                    >
+                      Start for Free
+                    </Link>
+                    <button
+                      onClick={handleGetProAccess}
+                      className="px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 transition-colors"
+                    >
+                      Get Pro Access - $19
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Pricing Card Visual */}
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-purple-600 rounded-2xl blur opacity-30"></div>
+              <div className={`absolute -inset-1 bg-gradient-to-r ${isPro ? 'from-green-500 to-emerald-600' : 'from-primary-500 to-purple-600'} rounded-2xl blur opacity-30`}></div>
               <div className="relative bg-neutral-800 rounded-2xl p-8 border border-neutral-700">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Pro Edition</h3>
-                    <p className="text-neutral-400">One-time payment</p>
+                    <h3 className="text-xl font-bold text-white">
+                      {isPro ? 'Pro Member' : 'Pro Edition'}
+                    </h3>
+                    <p className="text-neutral-400">
+                      {isPro ? 'Full access unlocked' : 'One-time payment'}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">$19</p>
-                    <p className="text-sm text-green-400">Save 50% today</p>
+                    {isPro ? (
+                      <>
+                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckIcon className="w-6 h-6 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-3xl font-bold text-white">$19</p>
+                        <p className="text-sm text-green-400">Save 50% today</p>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="h-2 bg-neutral-700 rounded-full overflow-hidden">
-                    <div className="h-full w-3/4 bg-primary-500 rounded-full"></div>
+                    <div className={`h-full ${isPro ? 'w-full bg-green-500' : 'w-3/4 bg-primary-500'} rounded-full`}></div>
                   </div>
-                  <p className="text-sm text-neutral-400 text-center">Limited time launch pricing</p>
+                  <p className="text-sm text-neutral-400 text-center">
+                    {isPro ? 'All content unlocked' : 'Limited time launch pricing'}
+                  </p>
                 </div>
               </div>
             </div>
