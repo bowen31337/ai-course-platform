@@ -8,6 +8,8 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { courseData } from '../data/courseData';
 import { useProgress } from '../context/ProgressContext';
 import { useAuth } from '../context/AuthContext';
+import { redirectToCheckout } from '../lib/stripe';
+import { useNavigate } from 'react-router-dom';
 
 const lessonIcons = {
   video: PlayCircle,
@@ -22,7 +24,16 @@ export default function LessonPage() {
   const week = courseData.find(w => w.id === weekNum);
   const lesson = week?.lessons.find(l => l.slug === lessonSlug);
   const { isComplete, toggleComplete, setLastLesson } = useProgress();
-  const { isPro } = useAuth();
+  const { isPro, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubscribe = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    redirectToCheckout(user.email);
+  };
 
   // Simple gating logic: Lock content after Week 1 for non-pro users
   const isLocked = !isPro && weekNum > 1;
@@ -152,7 +163,7 @@ export default function LessonPage() {
                   This lesson is part of our Pro curriculum. Upgrade to access all 10 weeks of content, projects, and expert guest sessions.
                 </p>
                 <button
-                  onClick={() => window.location.href = '/#pricing'}
+                  onClick={handleSubscribe}
                   className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
                 >
                   Upgrade to Pro

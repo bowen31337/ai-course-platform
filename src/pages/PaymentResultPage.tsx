@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
 
 export default function PaymentResultPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const status = searchParams.get('status');
-    const { user } = useAuth();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
@@ -18,24 +15,17 @@ export default function PaymentResultPage() {
             return;
         }
 
-        // If payment was successful, refresh the session to get updated is_pro status
-        if (status === 'success' && user) {
+        // If payment was successful, redirect after giving webhook time to process
+        // No user dependency - use hard redirect to force fresh session
+        if (status === 'success') {
             setIsRefreshing(true);
-            // Give webhook time to process (3 seconds), then refresh session
-            setTimeout(async () => {
-                try {
-                    // Refresh the session to get updated user metadata
-                    await supabase.auth.refreshSession();
-                    // Navigate to syllabus after refresh
-                    navigate('/syllabus', { replace: true });
-                } catch (error) {
-                    console.error('Error refreshing session:', error);
-                    // Fallback to reload if refresh fails
-                    window.location.href = '/syllabus';
-                }
-            }, 3000);
+            // Give webhook 5 seconds to process, then hard redirect
+            // Hard redirect ensures fresh session with updated app_metadata (is_pro)
+            setTimeout(() => {
+                window.location.href = '/syllabus';
+            }, 5000);
         }
-    }, [status, user, navigate]);
+    }, [status, navigate]);
 
     if (status === 'success') {
         return (
