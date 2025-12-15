@@ -38,9 +38,7 @@ export default function Navbar({ onMenuClick, onSearchClick, theme, onThemeToggl
           )}
           
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-primary-500 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.svg" alt="AI Dev Course Logo" className="w-9 h-9 rounded-lg" />
             <span className="font-semibold text-lg text-neutral-900 dark:text-white hidden sm:block">
               AI Dev Course
             </span>

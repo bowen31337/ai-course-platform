@@ -1,8 +1,21 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="128" fill="#0066FF"/>
-  <g transform="translate(106, 126) scale(12.5)">
-     <path d="M2 3H8A4 4 0 0 1 12 7V21A3 3 0 0 0 9 18H2V3Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-     <path d="M22 3H16A4 4 0 0 0 12 7V21A3 3 0 0 1 15 18H22V3Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0052CC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="128" fill="url(#grad)" />
+  <g transform="translate(106, 128)" fill="#FFFFFF">
+    <!-- A -->
+    <path d="M90 0 L150 0 L200 180 L160 180 L145 120 L95 120 L80 180 L40 180 Z M120 40 L105 90 L135 90 Z" />
+    <!-- I -->
+    <rect x="220" y="0" width="40" height="180" rx="4" />
+    <!-- Circuit Dots -->
+    <circle cx="90" cy="0" r="16" fill="#A3CCFF" />
+    <circle cx="240" cy="180" r="16" fill="#A3CCFF" />
+    <circle cx="260" cy="0" r="16" fill="#A3CCFF" />
+    <!-- Connection Line -->
+    <path d="M240 190 L240 230 L90 230 L90 200" stroke="#A3CCFF" stroke-width="12" fill="none" stroke-linecap="round" />
   </g>
-  <path d="M256 50 L 275 90 L 315 109 L 275 128 L 256 168 L 237 128 L 197 109 L 237 90 Z" fill="white"/>
 </svg>
