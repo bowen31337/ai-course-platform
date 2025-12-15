@@ -1,38 +1,48 @@
 // Stripe configuration for the AI Course Platform
-// Using Stripe Payment Links for simple checkout (no backend required)
+// Using Stripe Checkout Sessions for dynamic redirect URLs
 
 export const STRIPE_CONFIG = {
-    // Test mode payment link - replace with your actual payment link from Stripe Dashboard
-    // Create one at: https://dashboard.stripe.com/payment-links
-    paymentLink: 'https://buy.stripe.com/test_bJe14gedl3Ld0iOeDv0Fi00',
-
     // Publishable key for client-side Stripe.js (if needed later)
     publishableKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY || '',
 
     // Product configuration
     product: {
         name: 'AI Course Pro Access',
-        price: 4900, // $49.00 in cents
+        price: 1900, // $19.00 in cents
         currency: 'usd',
     },
-
-    // Success/Cancel URLs - must match PaymentResultPage route and query params
-    successUrl: `${window.location.origin}/payment?status=success`,
-    cancelUrl: `${window.location.origin}/payment?status=cancelled`,
 };
 
 // Helper function to redirect to Stripe checkout
-export function redirectToCheckout(userEmail?: string) {
-    // For now, use payment link (simplest approach, no backend needed)
-    // Later can upgrade to Stripe Checkout Sessions with a backend
-    const paymentUrl = new URL(STRIPE_CONFIG.paymentLink);
-    paymentUrl.searchParams.set('success_url', STRIPE_CONFIG.successUrl);
-    paymentUrl.searchParams.set('cancel_url', STRIPE_CONFIG.cancelUrl);
+export async function redirectToCheckout(userEmail?: string) {
+    try {
+        // Call our API to create a Checkout Session
+        const response = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: userEmail,
+                origin: window.location.origin,
+            }),
+        });
 
-    // Pre-fill customer email if provided
-    if (userEmail) {
-        paymentUrl.searchParams.set('prefilled_email', userEmail);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to create checkout session');
+        }
+
+        // Redirect to Stripe Checkout
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            throw new Error('No checkout URL returned');
+        }
+    } catch (error) {
+        console.error('Error redirecting to checkout:', error);
+        alert('Failed to start checkout. Please try again.');
     }
-
-    window.location.href = paymentUrl.toString();
 }
+

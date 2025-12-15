@@ -27,12 +27,12 @@ export default function LessonPage() {
   const { isPro, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!user) {
       navigate('/login');
       return;
     }
-    redirectToCheckout(user.email);
+    await redirectToCheckout(user.email);
   };
 
   // Simple gating logic: Lock content after Week 1 for non-pro users

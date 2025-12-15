@@ -20,7 +20,7 @@ export default function HomePage() {
       return;
     }
     // Redirect to Stripe checkout with user's email pre-filled
-    redirectToCheckout(user.email);
+    await redirectToCheckout(user.email);
   };
 
   const benefits = [
